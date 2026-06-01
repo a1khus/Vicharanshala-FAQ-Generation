@@ -1,0 +1,19 @@
+{
+  "name": "wiseflow-faq-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WiseFlow — Community-driven FAQ Platform",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "seed": "cd server && npm run seed",
+    "seed:vins": "cd server && npm run seed:vins",
+    "seed:all": "cd server && npm run seed && npm run seed:vins",
+    "build": "cd client && npm run build",
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

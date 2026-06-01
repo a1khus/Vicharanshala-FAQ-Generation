@@ -1,0 +1,112 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        primary: '#b52701',
+        'primary-container': '#ff5c35',
+        'on-primary': '#ffffff',
+        'on-primary-container': '#5a0e00',
+        'inverse-primary': '#ffb4a3',
+        'primary-fixed': '#ffdad2',
+        'primary-fixed-dim': '#ffb4a3',
+        'on-primary-fixed': '#3d0700',
+        'on-primary-fixed-variant': '#8a1c00',
+
+        secondary: '#5f5e5e',
+        'on-secondary': '#ffffff',
+        'secondary-container': '#e5e2e1',
+        'on-secondary-container': '#656464',
+        'secondary-fixed': '#e5e2e1',
+        'secondary-fixed-dim': '#c8c6c5',
+        'on-secondary-fixed': '#1c1b1b',
+        'on-secondary-fixed-variant': '#474646',
+
+        tertiary: '#494bd6',
+        'on-tertiary': '#ffffff',
+        'tertiary-container': '#8386ff',
+        'on-tertiary-container': '#0e009c',
+        'tertiary-fixed': '#e1e0ff',
+        'tertiary-fixed-dim': '#c0c1ff',
+        'on-tertiary-fixed': '#07006c',
+        'on-tertiary-fixed-variant': '#2f2ebe',
+
+        error: '#ba1a1a',
+        'on-error': '#ffffff',
+        'error-container': '#ffdad6',
+        'on-error-container': '#93000a',
+
+        background: '#f8f9fa',
+        'on-background': '#191c1d',
+
+        surface: '#f8f9fa',
+        'surface-dim': '#d9dadb',
+        'surface-bright': '#f8f9fa',
+        'surface-container-lowest': '#ffffff',
+        'surface-container-low': '#f3f4f5',
+        'surface-container': '#edeeef',
+        'surface-container-high': '#e7e8e9',
+        'surface-container-highest': '#e1e3e4',
+        'surface-variant': '#e1e3e4',
+        'surface-tint': '#b52701',
+        'on-surface': '#191c1d',
+        'on-surface-variant': '#5b413a',
+
+        'inverse-surface': '#2e3132',
+        'inverse-on-surface': '#f0f1f2',
+
+        outline: '#8f7069',
+        'outline-variant': '#e3beb6',
+      },
+      fontFamily: {
+        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        'display-lg': ['56px', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '700' }],
+        'headline-lg': ['40px', { lineHeight: '1.2', letterSpacing: '-0.01em', fontWeight: '700' }],
+        'headline-lg-mobile': ['32px', { lineHeight: '1.2', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '1.3', fontWeight: '600' }],
+        'body-lg': ['18px', { lineHeight: '1.6', fontWeight: '400' }],
+        'body-md': ['16px', { lineHeight: '1.6', fontWeight: '400' }],
+        'label-md': ['14px', { lineHeight: '1.2', letterSpacing: '0.05em', fontWeight: '600' }],
+      },
+      borderRadius: {
+        sm: '0.25rem',
+        DEFAULT: '0.5rem',
+        md: '0.75rem',
+        lg: '1rem',
+        xl: '1.5rem',
+        full: '9999px',
+      },
+      spacing: {
+        'container-max': '1280px',
+        gutter: '24px',
+        'margin-desktop': '64px',
+        'margin-mobile': '20px',
+        'section-gap': '120px',
+        'card-padding': '32px',
+      },
+      boxShadow: {
+        ambient: '0 4px 6px -1px rgba(0,0,0,0.05), 0 10px 40px -10px rgba(0,0,0,0.15)',
+        'ambient-hover': '0 10px 15px -3px rgba(0,0,0,0.1), 0 20px 40px -10px rgba(0,0,0,0.2)',
+        card: '0 1px 3px rgba(0,0,0,0.06), 0 4px 24px rgba(0,0,0,0.08)',
+        'card-hover': '0 4px 12px rgba(0,0,0,0.1), 0 16px 40px rgba(0,0,0,0.12)',
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.3s ease-out',
+        'slide-up': 'slideUp 0.4s ease-out',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
+      keyframes: {
+        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+        slideUp: { '0%': { opacity: '0', transform: 'translateY(16px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+      },
+      backdropBlur: {
+        xs: '2px',
+      },
+    },
+  },
+  plugins: [],
+};
