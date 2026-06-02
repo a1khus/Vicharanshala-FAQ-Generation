@@ -10,7 +10,8 @@
     "seed": "cd server && npm run seed",
     "seed:vins": "cd server && npm run seed:vins",
     "seed:all": "cd server && npm run seed && npm run seed:vins",
-    "build": "cd client && npm run build",
+    "build": "cd server && npm run build && cd ../client && npm run build",
+    "start": "cd server && npm start",
     "install:all": "npm install && cd server && npm install && cd ../client && npm install"
   },
   "devDependencies": {
