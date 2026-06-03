@@ -28,7 +28,7 @@ export const useSearchStore = create<SearchState>()(
       clearRecentSearches: () => set({ recentSearches: [] }),
     }),
     {
-      name: 'wiseflow-search',
+      name: 'samagama-search',
       partialize: (s) => ({ recentSearches: s.recentSearches }),
     }
   )

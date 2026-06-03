@@ -1,8 +1,8 @@
 {
-  "name": "wiseflow-faq-platform",
+  "name": "samagama-faq-platform",
   "version": "1.0.0",
   "private": true,
-  "description": "WiseFlow — Community-driven FAQ Platform",
+  "description": "Samagama — Community-driven FAQ Platform",
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "cd server && npm run dev",

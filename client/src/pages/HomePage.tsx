@@ -25,7 +25,7 @@ const HomePage = () => {
   const { data: mostSearchedData, isLoading: mostSearchedLoading } = useQuery({
     queryKey: ['questions', 'most-searched'],
     queryFn: questionsApi.getMostSearched,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
 
   const { data: statsData } = useQuery({
@@ -144,7 +144,7 @@ const HomePage = () => {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {mostSearched.slice(0, 3).map((q) => (
-              <motion.div key={q._id} variants={item}>
+              <motion.div key={q._id} variants={item} className="h-full">
                 <QuestionCard question={q} showSearchBadge />
               </motion.div>
             ))}
@@ -164,7 +164,7 @@ const PopularSection = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['questions', 'popular'],
     queryFn: questionsApi.getPopular,
-    staleTime: 10 * 60 * 1000,
+    staleTime: 0,
   });
   const popular = data?.data ?? [];
 
@@ -192,6 +192,7 @@ const PopularSection = () => {
             <motion.div
               key={q._id}
               variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}
+              className="h-full"
             >
               <QuestionCard question={q} />
             </motion.div>

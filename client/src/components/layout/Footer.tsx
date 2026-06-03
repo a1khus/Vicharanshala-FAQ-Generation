@@ -15,10 +15,10 @@ const Footer = () => {
           <div className="flex flex-col gap-3">
             <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
               <span className="material-symbols-outlined text-primary text-[28px]">hub</span>
-              <span className="text-headline-md font-bold text-on-surface">WiseFlow</span>
+              <span className="text-headline-md font-bold text-on-surface">Samagama</span>
             </Link>
             <p className="text-body-md text-on-surface-variant max-w-xs">
-              © {new Date().getFullYear()} WiseFlow Wisdom Collective. All rights reserved.
+              © {new Date().getFullYear()} Samagama Wisdom Collective. All rights reserved.
             </p>
           </div>
 

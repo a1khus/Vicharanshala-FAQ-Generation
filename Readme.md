@@ -397,9 +397,9 @@ NODE_ENV=development
 
 # ─── Database ─────────────────────────────────────────
 # Local MongoDB:
-MONGODB_URI=mongodb://localhost:27017/wiseflow
+MONGODB_URI=mongodb://localhost:27017/samagama
 # OR MongoDB Atlas:
-# MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/wiseflow
+# MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/samagama
 
 # ─── JWT ──────────────────────────────────────────────
 JWT_SECRET=your_super_secret_jwt_key_change_in_production
@@ -463,9 +463,9 @@ npm run seed:all
 
 | Role | Email | Password |
 |---|---|---|
-|  Admin | `admin@wiseflow.dev` | `admin123` |
-|  Moderator | `mod@wiseflow.dev` | `mod123` |
-|  User | `user@wiseflow.dev` | `user123` |
+| 🔴 Admin | `admin@samagama.dev` | `admin123` |
+| 🟡 Moderator | `mod@samagama.dev` | `mod123` |
+| 🟢 User | `user@samagama.dev` | `user123` |
 
 ### Option C — Docker Compose
 
@@ -790,7 +790,7 @@ docker compose logs -f server
 ### Using MongoDB Atlas
 
 ```env
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/wiseflow?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/samagama?retryWrites=true&w=majority
 ```
 
 ---

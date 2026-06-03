@@ -18,7 +18,7 @@ import { Category } from '../models/Category';
 import { Question } from '../models/Question';
 import { Answer } from '../models/Answer';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/wiseflow';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/samagama';
 
 // ─── Category definitions ─────────────────────────────────────────────────────
 const VINS_CATEGORIES = [

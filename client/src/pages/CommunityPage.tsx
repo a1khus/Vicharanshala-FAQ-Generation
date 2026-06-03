@@ -17,7 +17,7 @@ const CommunityPage = () => {
       <div className="mb-10 text-center">
         <h1 className="text-headline-lg font-bold text-on-surface mb-3">Our Community</h1>
         <p className="text-body-lg text-on-surface-variant max-w-xl mx-auto">
-          WiseFlow is powered by a community of knowledge-sharers. Together, we build a smarter FAQ ecosystem.
+          Samagama is powered by a community of knowledge-sharers. Together, we build a smarter FAQ ecosystem.
         </p>
       </div>
 

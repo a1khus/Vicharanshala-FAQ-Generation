@@ -272,6 +272,20 @@ export const getMostSearched = async (_req: Request, res: Response): Promise<voi
     if (results.length >= 6) break;
   }
 
+  // Pad if < 6
+  if (results.length < 6) {
+    const existingIds = results.map(r => r._id);
+    const fallback = await Question.find({ status: 'open', _id: { $nin: existingIds } })
+      .sort({ searchClickCount: -1, trendingScore: -1, voteScore: -1 })
+      .limit(6 - results.length)
+      .populate('author', 'username avatar')
+      .populate('category', 'name slug color icon')
+      .lean();
+    for (const q of fallback) {
+      results.push({ ...q, searchCount: q.searchClickCount, _finalScore: 0 });
+    }
+  }
+
   res.json(successResponse(results));
 };
 

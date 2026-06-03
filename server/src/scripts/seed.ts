@@ -15,7 +15,7 @@ import { User } from '../models/User';
 import { Category } from '../models/Category';
 import { Question } from '../models/Question';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/wiseflow';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/samagama';
 
 const categories = [
   { name: 'Programming', slug: 'programming', description: 'Code, algorithms, and software development', icon: 'code', color: '#494bd6' },
@@ -44,10 +44,10 @@ const seed = async () => {
   const adminHash = await bcrypt.hash('admin123', 12);
   const admin = await User.create({
     username: 'admin',
-    email: 'admin@wiseflow.dev',
+    email: 'admin@samagama.dev',
     passwordHash: adminHash,
     role: 'admin',
-    bio: 'WiseFlow platform administrator',
+    bio: 'Samagama platform administrator',
     reputation: 5000,
   });
 
@@ -55,7 +55,7 @@ const seed = async () => {
   const modHash = await bcrypt.hash('mod123', 12);
   const mod = await User.create({
     username: 'moderator',
-    email: 'mod@wiseflow.dev',
+    email: 'mod@samagama.dev',
     passwordHash: modHash,
     role: 'moderator',
     bio: 'Community moderator',
@@ -66,7 +66,7 @@ const seed = async () => {
   const userHash = await bcrypt.hash('user123', 12);
   const regularUser = await User.create({
     username: 'wiseuser',
-    email: 'user@wiseflow.dev',
+    email: 'user@samagama.dev',
     passwordHash: userHash,
     role: 'user',
     bio: 'Passionate developer and knowledge sharer',
@@ -181,7 +181,7 @@ const seed = async () => {
   console.log('\n✅ Seed complete!\n');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('  Admin credentials:');
-  console.log('  Email:    admin@wiseflow.dev');
+  console.log('  Email:    admin@samagama.dev');
   console.log('  Password: admin123');
   console.log('  Role:     admin');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');

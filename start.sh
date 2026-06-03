@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-#  WiseFlow — Local Start Script
+#  Samagama — Local Start Script
 #  Usage:  ./start.sh          (normal start)
 #          ./start.sh --seed   (reset DB + seed sample data, then start)
 #          ./start.sh --clean  (kill existing processes on ports 5001/5173)
@@ -19,7 +19,7 @@ LOG_DIR="$ROOT_DIR/.logs"
 SERVER_LOG="$LOG_DIR/server.log"
 CLIENT_LOG="$LOG_DIR/client.log"
 MONGO_LOG="$LOG_DIR/mongo.log"
-PID_FILE="$ROOT_DIR/.wiseflow.pids"
+PID_FILE="$ROOT_DIR/.samagama.pids"
 
 SEED=false
 CLEAN=false
@@ -32,7 +32,7 @@ for arg in "$@"; do
     --seed-vins)  SEED_VINS=true  ;;
     --clean)      CLEAN=true      ;;
     --help)
-      echo -e "${BOLD}WiseFlow start script${NC}"
+      echo -e "${BOLD}Samagama start script${NC}"
       echo "  ./start.sh                Start everything"
       echo "  ./start.sh --seed         Seed the database first, then start"
       echo "  ./start.sh --seed-vins    Add VINS FAQs to DB (requires --seed first run)"
@@ -82,7 +82,7 @@ kill_port() {
 # ── Cleanup on exit ───────────────────────────────────────────────────────────
 cleanup() {
   echo ""
-  info "Shutting down WiseFlow..."
+  info "Shutting down Samagama..."
   if [[ -f "$PID_FILE" ]]; then
     while IFS= read -r pid; do
       kill "$pid" 2>/dev/null || true
@@ -178,7 +178,7 @@ if $SEED; then
   cd "$ROOT_DIR"
   echo ""
   echo -e "  ${GREEN}${BOLD}Seed complete! Admin credentials:${NC}"
-  echo -e "  ${CYAN}  Email:    admin@wiseflow.dev${NC}"
+  echo -e "  ${CYAN}  Email:    admin@samagama.dev${NC}"
   echo -e "  ${CYAN}  Password: admin123${NC}"
 fi
 
@@ -257,7 +257,7 @@ success "Client ready      → http://localhost:5173"
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${GREEN}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${GREEN}${BOLD}  ✓  WiseFlow is running!${NC}"
+echo -e "${GREEN}${BOLD}  ✓  Samagama is running!${NC}"
 echo -e "${GREEN}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo -e "  ${BOLD}Frontend:${NC}  ${CYAN}http://localhost:5173${NC}"

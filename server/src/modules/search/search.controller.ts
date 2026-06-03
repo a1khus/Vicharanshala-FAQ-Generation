@@ -8,62 +8,76 @@ type SearchCandidate = Record<string, unknown> & { score?: number };
 
 const escapeRegex = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-const levenshteinDistance = (a: string, b: string): number => {
-  const alen = a.length;
-  const blen = b.length;
-  if (!alen) return blen;
-  if (!blen) return alen;
-
-  const dp: number[][] = Array.from({ length: alen + 1 }, () => Array(blen + 1).fill(0));
-  for (let i = 0; i <= alen; i += 1) dp[i][0] = i;
-  for (let j = 0; j <= blen; j += 1) dp[0][j] = j;
-
-  for (let i = 1; i <= alen; i += 1) {
-    for (let j = 1; j <= blen; j += 1) {
-      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      dp[i][j] = Math.min(
-        dp[i - 1][j] + 1,
-        dp[i][j - 1] + 1,
-        dp[i - 1][j - 1] + cost,
-      );
-    }
-  }
-
-  return dp[alen][blen];
-};
-
-const similarityScore = (source: string, target: string): number => {
-  if (!source || !target) return 0;
-  const distance = levenshteinDistance(source, target);
-  return Math.max(0, 1 - distance / Math.max(source.length, target.length, 1));
-};
+const stopWords = new Set(['is', 'are', 'am', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'shall', 'should', 'can', 'could', 'may', 'might', 'must', 'a', 'an', 'the', 'and', 'but', 'or', 'for', 'nor', 'on', 'at', 'to', 'from', 'by', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'up', 'down', 'in', 'out', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'just', 'don', 'now', 'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'of']);
 
 const buildRelevanceScore = (question: any, tokens: string[], queryLower: string, textScore = 0) => {
-  let score = textScore * 100;
-  const title = String(question.title).toLowerCase();
-  const description = String(question.description).toLowerCase();
+  // textScore from MongoDB is usually small (0.5 to 5), but highly relevant
+  let score = textScore * 500;
+  
+  const title = String(question.title || '').toLowerCase();
+  const description = String(question.description || '').toLowerCase();
   const tags: string[] = Array.isArray(question.tags)
     ? question.tags.map((tag: unknown) => String(tag).toLowerCase())
     : [];
 
-  if (title.includes(queryLower)) score += 80;
-  if (description.includes(queryLower)) score += 25;
+  // Filter out stop words from tokens to focus on meaning
+  const meaningfulTokens = tokens.filter(t => !stopWords.has(t));
+  const tokensToScore = meaningfulTokens.length > 0 ? meaningfulTokens : tokens;
 
-  tokens.forEach((token) => {
-    if (title.includes(token)) score += 30;
-    else score += Math.floor(similarityScore(token, title) * 14);
+  // Massive boost for exact full query match
+  if (title.includes(queryLower)) score += 5000;
+  if (description.includes(queryLower)) score += 2000;
 
-    if (description.includes(token)) score += 10;
-    else score += Math.floor(similarityScore(token, description) * 5);
+  let matchedTokens = 0;
 
-    if (tags.some((tag) => tag === token)) score += 20;
-    else if (tags.some((tag) => tag.includes(token))) score += 8;
+  tokensToScore.forEach((token) => {
+    let matched = false;
+    
+    // Exact word matches give massive points
+    const wordBoundaryRegex = new RegExp(`\\b${escapeRegex(token)}\\b`, 'i');
+    
+    if (wordBoundaryRegex.test(title)) {
+      score += 1000;
+      matched = true;
+    } else if (title.includes(token)) {
+      score += 300;
+      matched = true;
+    }
+    
+    if (wordBoundaryRegex.test(description)) {
+      score += 400;
+      matched = true;
+    } else if (description.includes(token)) {
+      score += 100;
+      matched = true;
+    }
+
+    if (tags.some((tag) => tag === token)) {
+      score += 800;
+      matched = true;
+    } else if (tags.some((tag) => tag.includes(token))) {
+      score += 200;
+      matched = true;
+    }
+    
+    if (matched) matchedTokens++;
   });
 
-  score += (question.trendingScore ?? 0) * 0.35;
-  score += (question.searchClickCount ?? 0) * 0.25;
-  score += (question.answerCount ?? 0) * 2;
-  score += (question.voteScore ?? 0) * 1.5;
+  // Severe penalty if NO meaningful tokens matched the text
+  // This prevents highly popular but irrelevant results from floating to the top
+  if (matchedTokens === 0 && score < 100) {
+    return 0; // Irrelevant
+  }
+
+  // Cap popularity metrics so they only act as a tie-breaker, not the main driver
+  const popularityScore = 
+    ((question.trendingScore ?? 0) * 1) + 
+    ((question.searchClickCount ?? 0) * 2) + 
+    ((question.answerCount ?? 0) * 5) + 
+    ((question.voteScore ?? 0) * 1);
+    
+  // Add capped popularity (max 1000 points)
+  score += Math.min(popularityScore, 1000);
 
   return score;
 };
@@ -84,28 +98,52 @@ export const search = async (req: Request, res: Response): Promise<void> => {
   // Log the search
   const searchLog = new SearchLog({ query: queryLower, userId: req.user?.userId ?? null });
 
-  const filter: Record<string, unknown> = {
+  const filterBase: Record<string, unknown> = {
     status: { $ne: 'deleted' },
-    $or: [
-      { $text: { $search: query } },
-      { title: tokenRegex },
-      { description: tokenRegex },
-      { tags: { $elemMatch: { $regex: tokenRegex } } },
-    ],
   };
+  
+  if (req.query.category) filterBase.category = req.query.category;
 
-  // Optional category filter
-  if (req.query.category) filter.category = req.query.category;
-
-  const total = await Question.countDocuments(filter);
+  const total = await Question.countDocuments(filterBase);
   const candidateLimit = Math.min(Math.max(limit * 5, 100), Math.max(total, 100));
 
-  const rawResults = (await Question.find(filter, { score: { $meta: 'textScore' } })
-    .sort({ score: { $meta: 'textScore' }, trendingScore: -1 })
-    .limit(candidateLimit)
-    .populate('author', 'username avatar')
-    .populate('category', 'name slug color icon')
-    .lean()) as SearchCandidate[];
+  let rawResults: SearchCandidate[] = [];
+  
+  try {
+    const textFilter = { ...filterBase, $text: { $search: query } };
+    rawResults = (await Question.find(textFilter, { score: { $meta: 'textScore' } })
+      .sort({ score: { $meta: 'textScore' }, trendingScore: -1 })
+      .limit(candidateLimit)
+      .populate('author', 'username avatar')
+      .populate('category', 'name slug color icon')
+      .lean()) as SearchCandidate[];
+  } catch (err) {
+    // Ignore text index errors
+  }
+
+  if (rawResults.length < candidateLimit) {
+    const regexFilter: any = {
+      ...filterBase,
+      $or: [
+        { title: tokenRegex },
+        { description: tokenRegex },
+        { tags: tokenRegex },
+      ],
+    };
+    
+    if (rawResults.length > 0) {
+      regexFilter._id = { $nin: rawResults.map(r => r._id) };
+    }
+
+    const extraResults = (await Question.find(regexFilter)
+      .sort({ trendingScore: -1 })
+      .limit(candidateLimit - rawResults.length)
+      .populate('author', 'username avatar')
+      .populate('category', 'name slug color icon')
+      .lean()) as SearchCandidate[];
+
+    rawResults = [...rawResults, ...extraResults];
+  }
 
   const ranked: Array<SearchCandidate & { relevanceScore: number }> = rawResults
     .map((result) => ({

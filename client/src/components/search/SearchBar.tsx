@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ArrowRight, TrendingUp, Clock, X, HelpCircle, Mic, MicOff, AlertCircle, Loader2 } from 'lucide-react';
+import { Search, ArrowRight, TrendingUp, Clock, X, HelpCircle, Mic, MicOff, AlertCircle, Loader2, DownloadCloud } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useSearchStore } from '../../store/uiStore';
@@ -33,12 +33,17 @@ function useDebounce<T>(value: T, delay: number): T {
 // ─── Utility: Highlight Text ─────────────────────────────────────────────────
 const escapeRegex = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+const stopWords = new Set(['is', 'are', 'am', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'shall', 'should', 'can', 'could', 'may', 'might', 'must', 'a', 'an', 'the', 'and', 'but', 'or', 'for', 'nor', 'on', 'at', 'to', 'from', 'by', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'up', 'down', 'in', 'out', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'just', 'don', 'now', 'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'of']);
+
 const HighlightedText = ({ text, query }: { text: string; query: string }) => {
-  if (!query.trim()) return <>{text}</>;
+  const normalized = query.trim();
+  if (!normalized) return <>{text}</>;
 
-  const tokens = Array.from(new Set(query.trim().split(/\s+/).map((token) => escapeRegex(token).toLowerCase()))).filter(Boolean);
-  if (!tokens.length) return <>{text}</>;
+  // Extract pure words, stripping punctuation, to highlight exactly what the user typed
+  const words = normalized.toLowerCase().match(/\b\w+\b/g) || [];
+  if (!words.length) return <>{text}</>;
 
+  const tokens = Array.from(new Set(words.map(escapeRegex)));
   const regex = new RegExp(`(${tokens.join('|')})`, 'gi');
   const parts = [];
   let lastIndex = 0;
@@ -83,7 +88,15 @@ const SearchBar = ({ autoFocus = false, size = 'lg' }: SearchBarProps) => {
   type VoiceStatus = 'idle' | 'listening' | 'processing' | 'completed' | 'error';
   const [voiceStatus, setVoiceStatus] = useState<VoiceStatus>('idle');
   const [voiceErrorText, setVoiceErrorText] = useState('');
-  const recognitionRef = useRef<any>(null);
+  
+  // Whisper Worker State
+  const workerRef = useRef<Worker | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<BlobPart[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+  
+  const [workerStatus, setWorkerStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [downloadProgress, setDownloadProgress] = useState(0);
 
   const { data: trendingData } = useQuery({
     queryKey: ['trending-searches'],
@@ -94,7 +107,7 @@ const SearchBar = ({ autoFocus = false, size = 'lg' }: SearchBarProps) => {
   const { data: liveSearchData, isFetching: isLiveSearchFetching } = useQuery({
     queryKey: ['live-search', debouncedQuery],
     queryFn: () => searchApi.search(debouncedQuery, 1),
-    enabled: debouncedQuery.trim().length > 0 && voiceStatus !== 'listening',
+    enabled: debouncedQuery.trim().length > 0 && voiceStatus === 'idle',
     staleTime: 1 * 60 * 1000,
   });
 
@@ -106,92 +119,119 @@ const SearchBar = ({ autoFocus = false, size = 'lg' }: SearchBarProps) => {
     if (autoFocus) inputRef.current?.focus();
   }, [autoFocus]);
 
-  // Effect to automatically search after voice processing completes
+  // Initialize Worker on mount
   useEffect(() => {
-    if (voiceStatus === 'processing') {
-      const timer = setTimeout(() => {
-        setVoiceStatus('completed');
-        if (localQuery.trim()) {
-          handleSearch(localQuery);
-        }
-        setTimeout(() => setVoiceStatus('idle'), 1500);
-      }, 600); // Simulate processing delay for smooth UX
-      return () => clearTimeout(timer);
-    }
-  }, [voiceStatus, localQuery]); // localQuery is safe here since we just want to submit it
+    if (window.Worker) {
+      workerRef.current = new Worker(new URL('../../workers/whisper.worker.ts', import.meta.url), {
+        type: 'module'
+      });
 
-  const toggleVoiceSearch = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    
-    if (!SpeechRecognition) {
-      toast.error('Voice search is not supported in your browser.');
-      return;
+      workerRef.current.onmessage = (event) => {
+        const { status, progress, output, error } = event.data;
+        if (status === 'progress') {
+          setWorkerStatus('loading');
+          if (progress?.progress !== undefined) {
+             setDownloadProgress(Math.round(progress.progress));
+          }
+        } else if (status === 'ready') {
+          setWorkerStatus('ready');
+        } else if (status === 'complete') {
+          setLocalQuery(output);
+          setVoiceStatus('completed');
+          setTimeout(() => {
+             const finalQuery = output.trim();
+             if (finalQuery) {
+               addRecentSearch(finalQuery);
+               navigate(`/search?q=${encodeURIComponent(finalQuery)}`);
+             }
+             setVoiceStatus('idle');
+             setFocused(false);
+          }, 1500);
+        } else if (status === 'error') {
+          setWorkerStatus('error');
+          setVoiceStatus('error');
+          setVoiceErrorText(error || 'Unknown error occurred.');
+          toast.error(error || 'Voice engine error');
+        }
+      };
+
+      workerRef.current.postMessage({ type: 'load' });
+    }
+
+    return () => {
+      workerRef.current?.terminate();
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [navigate, addRecentSearch]);
+
+  const toggleVoiceSearch = async () => {
+    if (workerStatus === 'loading') {
+       toast.error('Voice engine is still downloading... Please wait.');
+       return;
+    }
+    if (workerStatus === 'error') {
+       toast.error('Voice engine failed to load.');
+       return;
+    }
+    if (workerStatus !== 'ready') {
+       toast.error('Voice engine not ready.');
+       return;
     }
 
     if (voiceStatus === 'listening') {
-      recognitionRef.current?.stop();
+      handleStopVoiceSearch();
       return;
     }
 
     try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        setVoiceStatus('processing');
+        const mimeType = mediaRecorder.mimeType || 'audio/webm';
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        
+        try {
+          const audioContext = new window.AudioContext({ sampleRate: 16000 });
+          const arrayBuffer = await audioBlob.arrayBuffer();
+          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          const float32Array = audioBuffer.getChannelData(0); // mono
+          
+          workerRef.current?.postMessage({
+            type: 'transcribe',
+            audio: float32Array
+          });
+        } catch (err: any) {
+          console.error('Audio decode error:', err);
+          setVoiceStatus('error');
+          setVoiceErrorText('Failed to process audio.');
+        }
+
+        stream.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      };
+
       setVoiceErrorText('');
-      
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = true;
-      recognition.lang = 'en-US';
-
-      recognition.onstart = () => {
-        setVoiceStatus('listening');
-        setLocalQuery(''); // Clear existing query when starting new voice search
-      };
-
-      recognition.onresult = (event: any) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          transcript += event.results[i][0].transcript;
-        }
-        setLocalQuery(transcript);
-      };
-
-      recognition.onerror = (event: any) => {
-        if (event.error === 'no-speech') {
-          setVoiceStatus('idle');
-          return;
-        }
-
-        setVoiceStatus('error');
-        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-          setVoiceErrorText('Microphone access denied. Please check your browser permissions.');
-        } else if (event.error === 'audio-capture') {
-          setVoiceErrorText('No microphone found. Please ensure a microphone is connected.');
-        } else if (event.error === 'network') {
-          setVoiceErrorText('Network error occurred during speech recognition.');
-        } else {
-          setVoiceErrorText(`Voice recognition error: ${event.error}`);
-        }
-        
-        toast.error(`Voice search failed: ${event.error}`);
-        
-        setTimeout(() => {
-          setVoiceStatus((prev) => (prev === 'error' ? 'idle' : prev));
-        }, 4000);
-      };
-
-      recognition.onend = () => {
-        setVoiceStatus((prev) => {
-          if (prev === 'listening') return 'processing';
-          return prev;
-        });
-      };
-
-      recognitionRef.current = recognition;
-      recognition.start();
+      setLocalQuery('');
+      mediaRecorder.start();
+      setVoiceStatus('listening');
       setFocused(true);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error('Could not start voice search.');
-      setVoiceStatus('idle');
+      setVoiceStatus('error');
+      setVoiceErrorText('Microphone access denied or unavailable.');
     }
   };
 
@@ -215,11 +255,11 @@ const SearchBar = ({ autoFocus = false, size = 'lg' }: SearchBarProps) => {
     setLocalQuery('');
     inputRef.current?.focus();
     if (voiceStatus === 'listening') {
-      recognitionRef.current?.stop();
+      handleStopVoiceSearch();
     }
   };
 
-  const showDropdown = focused && (localQuery.trim().length > 0 || recentSearches.length > 0 || trending.length > 0 || voiceStatus !== 'idle');
+  const showDropdown = focused && (localQuery.trim().length > 0 || recentSearches.length > 0 || trending.length > 0) && voiceStatus === 'idle';
   const showReset = localQuery.length > 0;
   
   // Calculate right padding based on size and active buttons
@@ -230,6 +270,12 @@ const SearchBar = ({ autoFocus = false, size = 'lg' }: SearchBarProps) => {
     }
     if (showReset) return 'pr-24';
     return 'pr-16';
+  };
+
+  const handleStopVoiceSearch = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
   };
 
   return (
@@ -275,15 +321,32 @@ const SearchBar = ({ autoFocus = false, size = 'lg' }: SearchBarProps) => {
           <button
             type="button"
             onClick={toggleVoiceSearch}
+            disabled={workerStatus === 'loading' || workerStatus === 'error'}
             className={`p-2.5 rounded-full transition-all duration-300 shadow-sm flex items-center justify-center relative ${
               voiceStatus === 'listening' 
                 ? 'bg-error text-white animate-pulse' 
+                : workerStatus === 'loading'
+                ? 'bg-surface-container cursor-not-allowed opacity-70'
                 : 'bg-surface-container hover:bg-surface-container-high text-on-surface-variant'
             }`}
             aria-label="Voice Search"
-            title="Search by voice"
+            title={workerStatus === 'loading' ? `Downloading Voice Model (${downloadProgress}%)` : 'Search by voice'}
           >
-            {voiceStatus === 'listening' ? <MicOff size={18} /> : <Mic size={18} />}
+            {workerStatus === 'loading' ? (
+              <Loader2 size={18} className="animate-spin text-primary" />
+            ) : voiceStatus === 'listening' ? (
+              <MicOff size={18} />
+            ) : (
+              <Mic size={18} />
+            )}
+            
+            {workerStatus === 'loading' && (
+              <div 
+                className="absolute inset-0 rounded-full border-2 border-primary/20" 
+                style={{ clipPath: `inset(${100 - downloadProgress}% 0 0 0)` }}
+              />
+            )}
+            
             {voiceStatus === 'listening' && (
               <span className="absolute inset-0 rounded-full border-2 border-error animate-ping opacity-75" />
             )}
@@ -303,6 +366,99 @@ const SearchBar = ({ autoFocus = false, size = 'lg' }: SearchBarProps) => {
         </div>
       </div>
 
+      {/* Voice Search Modal */}
+      <AnimatePresence>
+        {voiceStatus !== 'idle' && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => {
+                handleStopVoiceSearch();
+                setVoiceStatus('idle');
+              }}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-surface rounded-3xl shadow-2xl w-full max-w-md p-8 flex flex-col items-center text-center border border-outline-variant/20 overflow-hidden"
+            >
+              {voiceStatus === 'listening' && (
+                <div className="absolute inset-0 bg-primary/5 animate-pulse rounded-3xl pointer-events-none" />
+              )}
+              
+              <button
+                onClick={() => {
+                  handleStopVoiceSearch();
+                  setVoiceStatus('idle');
+                }}
+                className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+
+              {voiceStatus === 'listening' && (
+                <>
+                  <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mb-6 relative">
+                    <span className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
+                    <Mic size={40} className="text-primary" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-on-surface mb-2">Listening...</h3>
+                  <p className="text-base text-on-surface-variant max-w-xs mb-8 min-h-[48px] flex items-center justify-center">
+                    Speak clearly into your microphone...
+                  </p>
+                  <button
+                    onClick={handleStopVoiceSearch}
+                    className="px-8 py-3 bg-primary text-on-primary rounded-full font-semibold hover:bg-primary/90 transition-colors shadow-sm"
+                  >
+                    Done
+                  </button>
+                </>
+              )}
+              
+              {voiceStatus === 'processing' && (
+                <>
+                  <div className="w-24 h-24 bg-primary-container/10 rounded-full flex items-center justify-center mb-6">
+                    <Loader2 size={40} className="text-primary-container animate-spin" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-on-surface mb-2">Processing AI</h3>
+                  <p className="text-base text-on-surface-variant">Converting speech to text...</p>
+                </>
+              )}
+              
+              {voiceStatus === 'completed' && (
+                <>
+                  <div className="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center mb-6">
+                    <Search size={40} className="text-green-600" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-on-surface mb-2">Found it!</h3>
+                  <p className="text-base font-semibold text-on-surface-variant mt-2">"{localQuery}"</p>
+                </>
+              )}
+              
+              {voiceStatus === 'error' && (
+                <>
+                  <div className="w-24 h-24 bg-error/10 rounded-full flex items-center justify-center mb-6">
+                    <AlertCircle size={40} className="text-error" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-on-surface mb-2">Oops!</h3>
+                  <p className="text-base text-on-surface-variant mb-6">{voiceErrorText}</p>
+                  <button 
+                    onClick={() => setVoiceStatus('idle')}
+                    className="px-8 py-3 bg-surface-container-high text-on-surface rounded-full font-semibold hover:bg-surface-container-highest transition-colors"
+                  >
+                    Try again
+                  </button>
+                </>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Dropdown */}
       <AnimatePresence>
         {showDropdown && (
@@ -313,55 +469,7 @@ const SearchBar = ({ autoFocus = false, size = 'lg' }: SearchBarProps) => {
             transition={{ duration: 0.15 }}
             className={`absolute top-full left-0 mt-2 bg-surface-container-lowest rounded-xl shadow-ambient-hover border border-outline-variant/30 overflow-hidden z-50 ${size === 'lg' ? 'w-full max-w-2xl' : 'w-full'}`}
           >
-            {/* Voice Search Status UI */}
-            {voiceStatus !== 'idle' ? (
-              <div className="p-6 flex flex-col items-center justify-center text-center">
-                {voiceStatus === 'listening' && (
-                  <>
-                    <div className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mb-4 relative">
-                      <span className="absolute inset-0 rounded-full bg-error/20 animate-ping" />
-                      <Mic size={28} className="text-error" />
-                    </div>
-                    <h3 className="text-lg font-bold text-on-surface mb-2">Listening...</h3>
-                    <p className="text-sm text-on-surface-variant max-w-xs">
-                      {localQuery ? `"${localQuery}"` : "Speak clearly into your microphone."}
-                    </p>
-                  </>
-                )}
-                {voiceStatus === 'processing' && (
-                  <>
-                    <div className="w-16 h-16 bg-primary-container/10 rounded-full flex items-center justify-center mb-4">
-                      <Loader2 size={28} className="text-primary-container animate-spin" />
-                    </div>
-                    <h3 className="text-lg font-bold text-on-surface mb-2">Processing</h3>
-                    <p className="text-sm text-on-surface-variant">Searching for "{localQuery}"...</p>
-                  </>
-                )}
-                {voiceStatus === 'completed' && (
-                  <>
-                    <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-4">
-                      <Search size={28} className="text-green-600" />
-                    </div>
-                    <h3 className="text-lg font-bold text-on-surface mb-2">Found it!</h3>
-                  </>
-                )}
-                {voiceStatus === 'error' && (
-                  <>
-                    <div className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mb-4">
-                      <AlertCircle size={28} className="text-error" />
-                    </div>
-                    <h3 className="text-lg font-bold text-on-surface mb-2">Oops!</h3>
-                    <p className="text-sm text-on-surface-variant">{voiceErrorText}</p>
-                    <button 
-                      onClick={() => setVoiceStatus('idle')}
-                      className="mt-4 text-sm font-semibold text-primary hover:underline"
-                    >
-                      Try again
-                    </button>
-                  </>
-                )}
-              </div>
-            ) : localQuery.trim().length > 0 ? (
+            {localQuery.trim().length > 0 ? (
               /* Live Search Results */
               <div className="py-2">
                 {isLiveSearchFetching && debouncedQuery === localQuery ? (

@@ -145,7 +145,7 @@ const LoginPage = () => {
     mutationFn: authApi.signup,
     onSuccess: (res) => {
       setAuth(res.data.user, res.data.accessToken);
-      toast.success(`Welcome to WiseFlow, ${res.data.user.username}!`);
+      toast.success(`Welcome to Samagama, ${res.data.user.username}!`);
       navigate('/questions');
     },
     onError: (err: any) => {
@@ -214,7 +214,7 @@ const LoginPage = () => {
                 className="flex items-center gap-2.5 mb-10"
               >
                 <span className="material-symbols-outlined text-white/90 text-[28px]">hub</span>
-                <span className="text-headline-md font-bold text-white tracking-tight">WiseFlow</span>
+                <span className="text-headline-md font-bold text-white tracking-tight">Samagama</span>
               </motion.div>
 
               {/* Headline */}

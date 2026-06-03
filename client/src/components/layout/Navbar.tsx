@@ -48,7 +48,7 @@ const Navbar = () => {
               hub
             </span>
             <span className="text-headline-md font-bold text-primary tracking-tight">
-              WiseFlow
+              Samagama
             </span>
           </Link>
 

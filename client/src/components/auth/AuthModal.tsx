@@ -45,7 +45,7 @@ const AuthModal = () => {
     mutationFn: authApi.signup,
     onSuccess: (res) => {
       setAuth(res.data.user, res.data.accessToken);
-      toast.success(`Welcome to WiseFlow, ${res.data.user.username}!`);
+      toast.success(`Welcome to Samagama, ${res.data.user.username}!`);
       closeAuthModal();
     },
     onError: (err: any) => toast.error(err?.response?.data?.message || 'Signup failed'),
@@ -78,7 +78,7 @@ const AuthModal = () => {
             <div className="flex items-center justify-between p-6 border-b border-outline-variant/20">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary-container text-2xl">hub</span>
-                <span className="font-bold text-on-surface text-lg">WiseFlow</span>
+                <span className="font-bold text-on-surface text-lg">Samagama</span>
               </div>
               <button
                 onClick={closeAuthModal}

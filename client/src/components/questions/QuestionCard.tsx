@@ -42,10 +42,11 @@ const QuestionCard = ({
     <motion.div
       whileHover={{ y: -3 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
+      className="h-full"
     >
       <Link
         to={`/questions/${question._id}`}
-        className="block bg-surface-container-lowest rounded-xl border border-outline-variant/30 hover:border-outline-variant/60 transition-all duration-300 cursor-pointer group"
+        className="block h-full bg-surface-container-lowest rounded-xl border border-outline-variant/30 hover:border-outline-variant/60 transition-all duration-300 cursor-pointer group"
         style={{
           boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05), 0 10px 40px -10px rgba(0,0,0,0.12)',
         }}

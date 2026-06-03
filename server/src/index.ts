@@ -40,19 +40,19 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Global rate limit: 200 req / 15 min
+// Global rate limit: 1000 req / 15 min
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: 1000,
   message: { success: false, message: 'Too many requests, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// Strict rate limit for auth: 10 req / 15 min
+// Rate limit for auth: 100 req / 15 min
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 100,
   message: { success: false, message: 'Too many auth requests' },
 });
 
@@ -102,7 +102,7 @@ app.use(errorHandler);
 const start = async () => {
   await connectDB();
   app.listen(PORT, () => {
-    console.log(`🚀 WiseFlow API running on http://localhost:${PORT}`);
+    console.log(`🚀 Samagama API running on http://localhost:${PORT}`);
     console.log(`📦 Environment: ${process.env.NODE_ENV || 'development'}`);
   });
 };

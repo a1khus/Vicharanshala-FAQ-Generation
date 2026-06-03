@@ -12,13 +12,17 @@ import { AlertCircle, Send } from 'lucide-react';
 
 const escapeRegex = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+const stopWords = new Set(['is', 'are', 'am', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'shall', 'should', 'can', 'could', 'may', 'might', 'must', 'a', 'an', 'the', 'and', 'but', 'or', 'for', 'nor', 'on', 'at', 'to', 'from', 'by', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'up', 'down', 'in', 'out', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'just', 'don', 'now', 'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'of']);
+
 const getHighlightedTextParts = (text: string, query: string) => {
   const normalized = query.trim();
   if (!normalized) return undefined;
 
-  const tokens = Array.from(new Set(normalized.split(/\s+/).map((token) => escapeRegex(token).toLowerCase()))).filter(Boolean);
-  if (!tokens.length) return undefined;
+  // Extract pure words, stripping punctuation, to highlight exactly what the user typed
+  const words = normalized.toLowerCase().match(/\b\w+\b/g) || [];
+  if (!words.length) return undefined;
 
+  const tokens = Array.from(new Set(words.map(escapeRegex)));
   const regex = new RegExp(`(${tokens.join('|')})`, 'gi');
   const parts: Array<{ text: string; highlight: boolean }> = [];
   let lastIndex = 0;
@@ -99,7 +103,7 @@ const SearchPage = () => {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
         >
           {results.map((q) => (
-            <div key={q._id} onClick={() => handleResultClick(q._id)}>
+            <div key={q._id} onClick={() => handleResultClick(q._id)} className="h-full">
               <QuestionCard
                 question={q}
                 highlightedTitleParts={getHighlightedTextParts(q.title, query)}
