@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Search, LogOut, User, Settings, ChevronDown } from 'lucide-react';
+import { Menu, X, Search, LogOut, User, Settings, ChevronDown, Sun, Moon } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { authApi } from '../../services/auth.service';
 
@@ -9,6 +9,20 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    return localStorage.getItem('theme') === 'dark';
+  });
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDark]);
+
   const { user, isAuthenticated, logout } = useAuthStore();
   const navigate = useNavigate();
 
@@ -80,6 +94,19 @@ const Navbar = () => {
             >
               <Search size={18} />
             </Link>
+
+            {/* ✅ Dark/Light Toggle - Desktop */}
+            <button
+              onClick={() => setIsDark(!isDark)}
+              className="hidden md:flex items-center justify-center w-9 h-9 rounded-full hover:bg-surface-container-low transition-all"
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {isDark ? (
+                <Sun size={18} className="text-yellow-400" />
+              ) : (
+                <Moon size={18} className="text-on-surface-variant" />
+              )}
+            </button>
 
             {isAuthenticated && user ? (
               <div className="relative">
@@ -193,6 +220,18 @@ const Navbar = () => {
               >
                 <Search size={16} /> Search
               </Link>
+
+              {/* ✅ Dark/Light Toggle - Mobile */}
+              <button
+                onClick={() => setIsDark(!isDark)}
+                className="px-4 py-3 rounded-xl text-label-md font-semibold text-on-surface hover:bg-surface-container-low flex items-center gap-2"
+              >
+                {isDark ? (
+                  <><Sun size={16} className="text-yellow-400" /> Light Mode</>
+                ) : (
+                  <><Moon size={16} className="text-on-surface-variant" /> Dark Mode</>
+                )}
+              </button>
             </div>
           </motion.div>
         )}
