@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ask a Question - WiseFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#e1e0ff",
+                    "outline": "#8f7069",
+                    "on-background": "#191c1d",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#ff5c35",
+                    "surface-container": "#edeeef",
+                    "on-error-container": "#93000a",
+                    "secondary": "#5f5e5e",
+                    "on-primary-container": "#5a0e00",
+                    "background": "#f8f9fa",
+                    "surface-bright": "#f8f9fa",
+                    "error": "#ba1a1a",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "surface-container-low": "#f3f4f5",
+                    "on-error": "#ffffff",
+                    "inverse-primary": "#ffb4a3",
+                    "surface-tint": "#b52701",
+                    "primary": "#b52701",
+                    "on-tertiary-container": "#0e009c",
+                    "on-secondary-fixed-variant": "#474646",
+                    "on-primary": "#ffffff",
+                    "on-primary-fixed": "#3d0700",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-primary-fixed-variant": "#8a1c00",
+                    "on-surface": "#191c1d",
+                    "outline-variant": "#e3beb6",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#494bd6",
+                    "tertiary-fixed-dim": "#c0c1ff",
+                    "inverse-surface": "#2e3132",
+                    "tertiary-container": "#8386ff",
+                    "surface-dim": "#d9dadb",
+                    "on-secondary": "#ffffff",
+                    "surface": "#f8f9fa",
+                    "on-tertiary-fixed-variant": "#2f2ebe",
+                    "on-secondary-container": "#656464",
+                    "inverse-on-surface": "#f0f1f2",
+                    "surface-container-high": "#e7e8e9",
+                    "on-secondary-fixed": "#1c1b1b",
+                    "secondary-container": "#e5e2e1",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#5b413a",
+                    "on-tertiary-fixed": "#07006c",
+                    "secondary-fixed": "#e5e2e1",
+                    "primary-fixed-dim": "#ffb4a3",
+                    "primary-fixed": "#ffdad2",
+                    "surface-variant": "#e1e3e4"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-max": "1280px",
+                    "section-gap": "120px",
+                    "margin-mobile": "20px",
+                    "gutter": "24px",
+                    "card-padding": "32px",
+                    "margin-desktop": "64px"
+            },
+            "fontFamily": {
+                    "label-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "label-md": ["14px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "display-lg": ["56px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .form-card {
+            background-color: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 40px 40px -15px rgba(0,0,0,0.15);
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #ff5c35 !important;
+            box-shadow: 0 0 0 4px rgba(255, 92, 53, 0.1) !important;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased">
+<!-- TopAppBar -->
+<header class="bg-surface/80 backdrop-blur-xl fixed top-0 w-full z-50 shadow-[0_40px_40px_-15px_rgba(0,0,0,0.15)]">
+<div class="flex justify-between items-center h-20 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-3xl">bubble_chart</span>
+<span class="text-headline-md font-headline-md font-bold text-primary">WiseFlow</span>
+</div>
+<nav class="hidden md:flex gap-8">
+<a class="text-on-surface-variant hover:opacity-80 transition-opacity duration-300 font-semibold" href="#">Explore</a>
+<a class="text-on-surface-variant hover:opacity-80 transition-opacity duration-300 font-semibold" href="#">Community</a>
+<a class="text-primary font-bold transition-opacity duration-300" href="#">Ask Question</a>
+</nav>
+<button class="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-full font-label-md hover:opacity-80 active:scale-95 transition-all duration-300">
+                Get Started
+            </button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-32 pb-section-gap px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<!-- Header Section -->
+<div class="mb-12 max-w-3xl">
+<h1 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg text-on-surface mb-4">Ask a Question</h1>
+<p class="text-body-lg text-on-secondary-container">Share your question with the community and get expert answers. Our community-driven wisdom helps thousands every day.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- Question Form Column -->
+<div class="lg:col-span-8 space-y-8">
+<div class="form-card p-card-padding">
+<!-- Question Title -->
+<div class="mb-8">
+<label class="block text-label-md text-on-surface mb-2" for="title">Question Title</label>
+<p class="text-sm text-on-secondary-container mb-3 italic">Be specific and imagine you’re asking a question to another person.</p>
+<input class="w-full bg-surface-container-low border-0 rounded-xl px-4 py-4 text-body-md placeholder:text-on-surface-variant/50 transition-all" id="title" placeholder="e.g. How do I integrate Tailwind CSS with Next.js App Router?" type="text"/>
+</div>
+<!-- Editor Section -->
+<div class="mb-8">
+<label class="block text-label-md text-on-surface mb-2">Description Editor</label>
+<div class="border-2 border-surface-container-high rounded-xl overflow-hidden">
+<!-- Toolbar -->
+<div class="bg-surface-container-low px-4 py-2 flex flex-wrap gap-2 border-b border-surface-container-high">
+<button class="p-2 hover:bg-surface-container-high rounded-lg transition-colors" title="Bold"><span class="material-symbols-outlined text-xl">format_bold</span></button>
+<button class="p-2 hover:bg-surface-container-high rounded-lg transition-colors" title="Italic"><span class="material-symbols-outlined text-xl">format_italic</span></button>
+<button class="p-2 hover:bg-surface-container-high rounded-lg transition-colors" title="Link"><span class="material-symbols-outlined text-xl">link</span></button>
+<div class="w-px h-6 bg-surface-container-highest self-center"></div>
+<button class="p-2 hover:bg-surface-container-high rounded-lg transition-colors" title="Quote"><span class="material-symbols-outlined text-xl">format_quote</span></button>
+<button class="p-2 hover:bg-surface-container-high rounded-lg transition-colors" title="Code"><span class="material-symbols-outlined text-xl">code</span></button>
+<button class="p-2 hover:bg-surface-container-high rounded-lg transition-colors" title="Image"><span class="material-symbols-outlined text-xl">image</span></button>
+<div class="w-px h-6 bg-surface-container-highest self-center"></div>
+<button class="p-2 hover:bg-surface-container-high rounded-lg transition-colors" title="List"><span class="material-symbols-outlined text-xl">format_list_bulleted</span></button>
+</div>
+<!-- Textarea -->
+<textarea class="w-full bg-white border-0 p-4 text-body-md placeholder:text-on-surface-variant/50 focus:ring-0" placeholder="Explain the problem you're facing and what you've tried..." rows="12"></textarea>
+</div>
+<div class="mt-2 flex justify-end">
+<span class="text-xs text-on-surface-variant font-medium">Markdown Supported</span>
+</div>
+</div>
+<!-- Category & Tags Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+<div>
+<label class="block text-label-md text-on-surface mb-2" for="category">Category Selection</label>
+<div class="relative">
+<select class="w-full appearance-none bg-surface-container-low border-0 rounded-xl px-4 py-4 text-body-md cursor-pointer" id="category">
+<option disabled="" selected="" value="">Select a category</option>
+<option>Frontend Development</option>
+<option>Backend Infrastructure</option>
+<option>UI/UX Design</option>
+<option>Project Management</option>
+<option>Machine Learning</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div>
+<label class="block text-label-md text-on-surface mb-2" for="tags">Tags Input</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border-0 rounded-xl px-4 py-4 text-body-md pr-12" id="tags" placeholder="Add up to 5 tags (e.g. react, css)" type="text"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary">sell</span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex flex-col sm:flex-row gap-4 pt-4 border-t border-surface-container-high">
+<button class="flex-1 sm:flex-none bg-primary-container text-on-primary-container px-10 py-4 rounded-full font-label-md hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary-container/20">
+                            Post Question
+                        </button>
+<button class="flex-1 sm:flex-none bg-surface-container-high text-on-surface px-10 py-4 rounded-full font-label-md hover:bg-surface-container-highest active:scale-95 transition-all">
+                            Cancel
+                        </button>
+</div>
+</div>
+</div>
+<!-- Sidebar Column / Tips -->
+<div class="lg:col-span-4 space-y-6">
+<div class="form-card p-8 border border-primary/10">
+<div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+</div>
+<h3 class="text-headline-md font-headline-md mb-4">Tips for a Great Question</h3>
+<ul class="space-y-4">
+<li class="flex gap-3">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<p class="text-body-md text-on-secondary-container">Keep your title concise and descriptive.</p>
+</li>
+<li class="flex gap-3">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<p class="text-body-md text-on-secondary-container">Include code snippets if applicable.</p>
+</li>
+<li class="flex gap-3">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<p class="text-body-md text-on-secondary-container">Explain what you've already tried to solve it.</p>
+</li>
+</ul>
+</div>
+<div class="relative rounded-3xl overflow-hidden h-64 shadow-xl">
+<img alt="Help Section" class="w-full h-full object-cover grayscale opacity-50" data-alt="A sophisticated and bright office environment with soft morning light streaming through large windows. Professional people are collaborating in the background in a blurred, cinematic style. The atmosphere is calm, academic, and highly professional, reflecting a high-end SaaS corporate aesthetic with warm coral and cool gray tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCP-hbGOm4RPTZFIudaiuR1J1wAMjYeZOOsEBgPbE1QDQBVfCEbUWvWBYi64ubLvG-fGtFgJJydppQP240xtuhguiXJEZbAnFcTfuxiAyBtZXiHIDCJ2yL2q5JI7vQKJ3MJQ5VED65uhjmNfaH2fQWVYHFEfwDKOTi4xNfg32Q5j7T2qJ0U_G7Z7RZY3ze99jS-vPw9yS-dAnI__CZRv16mLalCWxeNBlGxGWS88qchNXbRutOJNNc5sO6yqex5aMbrr4e0Q_SCgdo"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-8">
+<div>
+<p class="text-white font-bold text-lg mb-1">Need help immediately?</p>
+<a class="text-primary-fixed-dim font-semibold hover:underline flex items-center gap-1" href="#">
+                                Join our Discord <span class="material-symbols-outlined text-sm">open_in_new</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low w-full rounded-t-xl">
+<div class="flex flex-col md:flex-row justify-between items-center gap-8 py-section-gap px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="space-y-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">bubble_chart</span>
+<span class="text-headline-md font-headline-md font-bold text-primary">WiseFlow</span>
+</div>
+<p class="text-body-md text-on-secondary-container max-w-xs">
+                    © 2024 WiseFlow. Community-driven wisdom.
+                </p>
+</div>
+<div class="grid grid-cols-2 gap-x-12 gap-y-4">
+<a class="text-on-secondary-container hover:text-primary transition-colors duration-200 font-medium" href="#">Knowledge Base</a>
+<a class="text-on-secondary-container hover:text-primary transition-colors duration-200 font-medium" href="#">Community Forum</a>
+<a class="text-on-secondary-container hover:text-primary transition-colors duration-200 font-medium" href="#">Success Stories</a>
+<a class="text-on-secondary-container hover:text-primary transition-colors duration-200 font-medium" href="#">Privacy Policy</a>
+</div>
+<div class="flex gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center cursor-pointer hover:bg-primary hover:text-white transition-all">
+<span class="material-symbols-outlined text-xl">share</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center cursor-pointer hover:bg-primary hover:text-white transition-all">
+<span class="material-symbols-outlined text-xl">hub</span>
+</div>
+</div>
+</div>
+</footer>
+<!-- Interactive script for minor effects -->
+<script>
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('mousedown', () => {
+                button.classList.add('scale-95');
+            });
+            button.addEventListener('mouseup', () => {
+                button.classList.remove('scale-95');
+            });
+        });
+
+        // Basic focus animation for the form fields
+        const inputs = document.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.closest('.form-card').style.transition = 'all 0.3s ease';
+            });
+        });
+    </script>
+</body></html>
