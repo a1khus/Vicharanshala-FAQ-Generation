@@ -12,6 +12,7 @@ import CategoryDetailPage from './pages/CategoryDetailPage';
 import CommunityPage from './pages/CommunityPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminDashboard from './pages/AdminDashboard';
+
 import { useAuthStore } from './store/authStore';
 
 const queryClient = new QueryClient({
@@ -51,6 +52,7 @@ function App() {
             <Route path="/admin" element={
               <ProtectedRoute><AdminDashboard /></ProtectedRoute>
             } />
+
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

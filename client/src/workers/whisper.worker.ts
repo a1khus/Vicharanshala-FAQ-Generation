@@ -5,7 +5,7 @@ env.allowLocalModels = false;
 env.useBrowserCache = true;
 
 class PipelineSingleton {
-    static task = 'automatic-speech-recognition';
+    static task: any = 'automatic-speech-recognition';
     static model = 'Xenova/whisper-tiny.en';
     static instance: any = null;
 
