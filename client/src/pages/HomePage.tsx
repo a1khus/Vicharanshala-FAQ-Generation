@@ -46,18 +46,7 @@ const HomePage = () => {
     <div>
       {/* ─── Hero Section ─── */}
       <section className="page-container py-24 md:py-32 flex flex-col items-center text-center">
-        {/* Live badge */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-low border border-outline-variant/50 mb-8 shadow-sm"
-        >
-          <span className="w-2 h-2 rounded-full bg-primary-container animate-pulse" />
-          <span className="text-label-md text-on-surface-variant">
-            {stats ? `Over ${(stats.totalAnswers).toLocaleString()} answers in the community` : 'Over 10,000 answers generated this week'}
-          </span>
-        </motion.div>
+
 
         {/* Headline */}
         <motion.h1
